@@ -11,6 +11,7 @@ import java.net.URL;
 import java.util.ResourceBundle;
 
 public class HelloController implements Initializable {
+    private boolean isNewNumber = true;
     @FXML
     private Label label_largeDisplay;
 
@@ -78,6 +79,7 @@ public class HelloController implements Initializable {
         btn_1.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
+                System.out.println("button 1 clicked");
                 updateDisplays("1");
             }
         });
@@ -141,30 +143,106 @@ public class HelloController implements Initializable {
                 doCalculation("+");
             }
         });
+        btn_substract.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                doCalculation("-");
+            }
+        });
+        btn_multiply.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                doCalculation("x");
+            }
+        });
+        btn_divide.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                doCalculation("/");
+            }
+        });
+
+        btn_C.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                clearDisplays();
+            }
+        });
     }
 
     public void updateDisplays(String text){
-        String smallDisplayText;
-        String largeDisplayText;
-        if ((text.equals("+")) || (text.equals("-")) || (text.equals("/")) || (text.equals("*"))){
 
-        }else if (label_largeDisplay.getText().equals("0")){
-           largeDisplayText = text;
+        String smallDisplayText = label_smallDisplay.getText();
+        String LargeDisplayText = label_largeDisplay.getText();
+
+        if (LargeDisplayText.equals("0")){
+            System.out.println("0");
+           LargeDisplayText = text;
+           label_largeDisplay.setText(LargeDisplayText);
         }else {
-            largeDisplayText = label_largeDisplay.getText() + text;
+            if (isNewNumber){
+                label_largeDisplay.setText(text);
+                isNewNumber = false;
+            }else{
+                label_largeDisplay.setText(LargeDisplayText + text);
+            }
         }
-
-
     }
 
     public void doCalculation(String operation){
-        double number1 = Double.parseDouble(label_largeDisplay.getText());
-        double number2 = Double.parseDouble(label_smallDisplay.getText());
+        isNewNumber = true;
+        String SmallDisplayValue = label_smallDisplay.getText();
+        String LargeDisplayValue = label_largeDisplay.getText();
 
-//        if (Stringutils)
-//        switch (operation) {
-//            case "+" :
-//                number1 + number2;
-//        }
+        double number1 = Double.parseDouble(LargeDisplayValue);
+
+        if (SmallDisplayValue.isEmpty()){ // small display is empty
+            label_smallDisplay.setText(number1 + operation);
+        }else { // small display must have an operation
+            if (SmallDisplayValue.contains("=")){
+                label_smallDisplay.setText(LargeDisplayValue+operation);
+            }else { // else it has one of the operations + - * /
+                char lastOperation = SmallDisplayValue.charAt(SmallDisplayValue.length() - 1);
+                double lastNumber = Double.parseDouble(SmallDisplayValue.substring(0,SmallDisplayValue.length()-2));
+                System.out.println("last operation" + lastOperation);
+                System.out.println("last number" + lastNumber);
+                try {
+                    double output = 0;
+                    switch (lastOperation) {
+                        case '+':
+                            output = lastNumber + number1;
+                            LargeDisplayValue = output + "";
+                            SmallDisplayValue = output + operation;
+                            break;
+                        case '-':
+                            output = lastNumber - number1;
+                            LargeDisplayValue = output + "";
+                            SmallDisplayValue = output + operation;
+                            break;
+                        case 'x':
+                            output = lastNumber * number1;
+                            LargeDisplayValue = output + "";
+                            SmallDisplayValue = output + operation;
+                            break;
+                        case '/':
+                            output = lastNumber / number1;
+                            LargeDisplayValue = output + "";
+                            SmallDisplayValue = output + operation;
+                            break;
+                        default:
+                            System.out.println("Not sure");
+                            break;
+                    }
+                } finally {
+                    label_largeDisplay.setText(LargeDisplayValue);
+                    label_smallDisplay.setText(SmallDisplayValue);
+                }
+            }
+        }
+    }
+
+    public void clearDisplays(){
+        label_largeDisplay.setText("");
+        label_smallDisplay.setText("");
     }
 }
